@@ -10,7 +10,7 @@ const firebaseConfig = {
 const db = getFirestore(initializeApp(firebaseConfig));
 const postList = document.getElementById('postList');
 const postForm = document.getElementById('postForm');
-const modal = document.getElementById('modal');
+const modal = document.getElementById('postModal');
 let posts = [];
 let activeFilter = 'all';
 let searchTerm = '';
@@ -29,14 +29,28 @@ function escapeHtml(value) {
   return String(value || '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
 }
 function getAuthor() {
-  try { return (JSON.parse(localStorage.getItem('badayaPendingProfile') || '{}').nickname || '바다친구').slice(0, 30); }
+  try {
+    const profile = JSON.parse(localStorage.getItem('badayaProfile') || '{}');
+    return (profile.name || profile.nickname || '바다친구').slice(0, 30);
+  }
   catch { return '바다친구'; }
 }
 function formatTime(value) {
   return value?.toDate ? value.toDate().toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '방금 전';
 }
 function setupPhotoInput() {
-  if (document.getElementById('postImage')) return;
+  const existingInput = document.getElementById('postImage');
+  if (existingInput) {
+    existingInput.onchange = (event) => {
+      selectedImageFile = event.target.files?.[0] || null;
+      const preview = document.getElementById('imagePreview') || document.getElementById('postImagePreview');
+      if (!preview) return;
+      if (!selectedImageFile) { preview.classList.add('hidden'); return; }
+      preview.src = URL.createObjectURL(selectedImageFile);
+      preview.classList.remove('hidden');
+    };
+    return;
+  }
   const field = document.createElement('div');
   field.className = 'mb-3';
   field.innerHTML = '<label class="pill flex cursor-pointer items-center justify-center gap-2 px-3 py-3 text-sm font-bold text-[#167b8d]">📷 사진 추가<input id="postImage" type="file" accept="image/*" class="hidden"></label><img id="postImagePreview" class="hidden mt-3 max-h-56 w-full rounded-2xl object-cover" alt="선택한 사진 미리보기"><p class="mt-2 text-xs text-[#76a4ae]">사진은 자동으로 최적화되어 업로드됩니다.</p>';
@@ -141,8 +155,8 @@ document.querySelectorAll('.communityFilter').forEach((button) => button.onclick
   document.querySelectorAll('.communityFilter').forEach((item) => item.classList.remove('active'));
   button.classList.add('active'); activeFilter = button.dataset.filter || 'all'; render();
 });
-document.getElementById('openModal').onclick = () => { document.getElementById('communityStatus')?.remove(); modal.classList.remove('hidden'); };
-document.getElementById('closeModal').onclick = () => modal.classList.add('hidden');
+document.getElementById('openPost').onclick = () => { document.getElementById('communityStatus')?.remove(); modal.classList.remove('hidden'); };
+document.getElementById('closePost').onclick = () => modal.classList.add('hidden');
 setupPhotoInput();
 postForm.onsubmit = async (event) => {
   event.preventDefault();
