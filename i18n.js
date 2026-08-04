@@ -8,6 +8,8 @@
     document.querySelectorAll('button,nav span,label,h1,h2,h3,p,small,span,a').forEach(el=>{if(el.children.length===0){const s=el.textContent.trim();if(words[s])el.textContent=words[s];else if(regions[s])el.textContent=regions[s];}});
     document.querySelectorAll('input,textarea').forEach(el=>{if(words[el.placeholder?.trim()])el.placeholder=words[el.placeholder.trim()];});
     document.querySelectorAll('.overlay-label,.facility-label,.place-label').forEach(el=>{let s=el.textContent;Object.entries(regions).forEach(([ko,en])=>s=s.replaceAll(ko,en));el.textContent=s;});
+    const replacements={'광안리 현재 날씨':'Gwangalli current weather','현재 해변 날씨':'Current beach weather','습도':'Humidity','바람':'Wind','기온':'Temperature','현재 대체로 맑음':'Mostly clear now','강수확률':'Precipitation chance','이 바다의 TOP 3':'TOP 3 for this beach','네이버 검색':'Naver search','전화':'Phone','리뷰':'Reviews','맛집':'Restaurants','숙박':'Hotels','활동':'Activities','지금':'Now'};
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);nodes.forEach(node=>{let s=node.nodeValue;if(!s||s.includes('바다야 놀자'))return;Object.entries(regions).forEach(([ko,en])=>s=s.replaceAll(ko,en));Object.entries(replacements).forEach(([ko,en])=>s=s.replaceAll(ko,en));node.nodeValue=s;});
   };
   window.addEventListener('badaya-language-change',run); document.addEventListener('change',e=>{if(e.target.id==='myLanguage'){localStorage.setItem('badayaLang',e.target.value);run();}}); document.addEventListener('DOMContentLoaded',()=>{run();setInterval(run,700);});
 })();
