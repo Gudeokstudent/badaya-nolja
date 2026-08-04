@@ -1,6 +1,8 @@
 (() => {
   const client = window.supabase.createClient('https://zrierhrnezckurjuykdx.supabase.co', 'sb_publishable_SwbyoOcHgicG4N9Mr2-Teg_s1ECQmc4');
   window.badayaSupabase = client;
+  const signupButton = document.querySelector('#signupForm button[type="submit"]');
+  if (signupButton) signupButton.textContent = '회원가입';
   const enter = () => { document.getElementById('authGate')?.remove(); document.querySelector('.app').style.visibility='visible'; document.querySelector('nav').style.visibility='visible'; };
   const error = (message) => { let el=document.getElementById('authError'); if(!el){el=document.createElement('p');el.id='authError';el.className='text-sm text-red-500 mt-3 font-bold';document.querySelector('.auth-card')?.appendChild(el);} el.textContent=message; };
   client.auth.getSession().then(({data:{session}})=>{if(session) enter();});
