@@ -13,5 +13,5 @@
       overlay.querySelector('[data-cancel]').onclick=()=>overlay.remove(); overlay.querySelector('[data-save]').onclick=()=>{localStorage.setItem('badayaPrefs',JSON.stringify([...selected]));overlay.remove();document.querySelector('[data-page="myPage"]')?.click();};
     };
   };
-  new MutationObserver(install).observe(document.body,{childList:true,subtree:true}); install();
+  document.addEventListener('DOMContentLoaded',()=>{install();new MutationObserver(install).observe(document.body,{childList:true,subtree:true});});
 })();
