@@ -1,60 +1,90 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>바다야 놀자</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BADAYA NOLJA</title>
   <style>
-    :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#174757;background:#eafaff}
-    *{box-sizing:border-box}body{margin:0;background:linear-gradient(160deg,#d9f8fc,#fff 55%,#eafaff);min-height:100vh}
-    button,select,input{font:inherit}.app{max-width:1080px;margin:auto;min-height:100vh;padding-bottom:84px}
-    header{height:76px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #c7edf2;background:#dff9fc}
-    .brand{font-size:25px;font-weight:900;color:#167b8d}.tag{color:#5e98a4;font-size:14px;font-weight:700}
-    main{padding:24px}.page{display:none}.page.active{display:block}.card{background:#fff;border:1px solid #a8e4ec;border-radius:26px;box-shadow:0 10px 28px #3987971d;padding:22px}
-    .hero{display:flex;gap:20px;align-items:center;justify-content:space-between}.hero h1{margin:0;color:#167b8d;font-size:28px}.hero p{color:#69919a;margin:8px 0 0}
-    .primary,.ghost{border-radius:16px;padding:13px 18px;border:1px solid #98dfe9;font-weight:800;cursor:pointer}.primary{background:#55cadb;color:#fff}.ghost{background:#fff;color:#167b8d}
-    .categories{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}.category{padding:16px;border-radius:18px;background:#fff;border:1px solid #b6eaf0;font-weight:800;text-align:center}
-    .notice{margin-top:18px;padding:16px 18px;border-radius:18px;background:#f0fcfe;color:#397887;font-size:14px}.list{display:grid;gap:12px;margin-top:16px}.item{padding:16px;border:1px solid #d8f1f4;border-radius:18px;background:#fff}.item b{display:block;margin-bottom:6px}
-    nav{position:fixed;z-index:20;bottom:0;left:50%;transform:translateX(-50%);width:min(1080px,100%);height:72px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 14px;background:#ffffffef;border-top:1px solid #d8f1f4}
-    .nav{border:0;background:transparent;color:#6795a0;font-weight:800;border-radius:14px;cursor:pointer}.nav.active{background:#55cadb;color:#fff}
-    .auth{position:fixed;z-index:50;inset:0;display:grid;place-items:center;padding:20px;background:linear-gradient(160deg,#e7fbff,#fff)}.auth[hidden]{display:none}
-    .auth-card{width:min(100%,420px);padding:28px;background:#fff;border:1px solid #b9e7ed;border-radius:28px;box-shadow:0 18px 55px #4bbdce33}.auth-card h2{margin:0;color:#167b8d;font-size:28px}.auth-card p{color:#6d98a1}.auth-card input{width:100%;margin:6px 0;padding:14px;border:1px solid #b9e7ed;border-radius:14px}.auth-card button{width:100%;margin-top:10px}
-    .map-box{min-height:280px;display:grid;place-items:center;border-radius:22px;background:linear-gradient(135deg,#d5f3e7,#c8ebfa);color:#387b8a;font-weight:800;text-align:center;padding:22px}
-    @media(max-width:620px){header{height:64px;padding:0 16px}.brand{font-size:21px}.tag{display:none}main{padding:16px}.hero{display:block}.hero button{margin-top:14px}.categories{grid-template-columns:1fr}.card{padding:18px}}
+    :root { font-family: Arial, sans-serif; color: #18495a; background: #eafaff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: linear-gradient(160deg, #d9f8fc, #ffffff 58%, #eafaff); }
+    button, input { font: inherit; }
+    .app { max-width: 1100px; min-height: 100vh; margin: 0 auto; padding-bottom: 84px; }
+    header { display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 12px 24px; border-bottom: 1px solid #bee7ed; background: #dff9fc; }
+    .brand { color: #147e90; font-size: 25px; font-weight: 900; letter-spacing: .08em; }
+    .tag { color: #5e98a4; font-weight: 700; }
+    main { padding: 26px 24px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .card { margin-bottom: 18px; padding: 24px; border: 1px solid #a8e4ed; border-radius: 24px; background: #ffffff; box-shadow: 0 14px 34px #48b8c21c; }
+    .hero { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    h1, h2 { margin: 0 0 10px; color: #147e90; }
+    p { line-height: 1.6; color: #5b8792; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .tile { padding: 20px; border-radius: 18px; background: #ecfbfd; color: #167b8d; font-weight: 800; text-align: center; }
+    .primary, .ghost { min-height: 46px; padding: 10px 16px; border: 1px solid #59c5d6; border-radius: 14px; cursor: pointer; font-weight: 800; }
+    .primary { color: #ffffff; background: #55c3d4; }
+    .ghost { color: #167b8d; background: #ffffff; }
+    .auth { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: linear-gradient(160deg, #e8fbff, #ffffff); }
+    .auth[hidden] { display: none; }
+    .auth-card { width: min(100%, 420px); padding: 28px; border: 1px solid #b9e7ed; border-radius: 28px; background: #ffffff; box-shadow: 0 18px 55px #4bbdce33; }
+    .auth-card input { width: 100%; margin: 6px 0; padding: 14px; border: 1px solid #b9e7ed; border-radius: 14px; }
+    .auth-card button { width: 100%; margin-top: 10px; }
+    .map-box { display: grid; min-height: 260px; place-items: center; border-radius: 20px; background: linear-gradient(135deg, #d5f3e7, #c8ebfa); color: #387b8a; font-size: 18px; font-weight: 800; text-align: center; }
+    nav { position: fixed; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, 1fr); max-width: 1100px; margin: auto; padding: 8px; border-top: 1px solid #bee7ed; background: #ffffffee; }
+    .nav { min-height: 52px; border: 0; color: #5c929d; background: transparent; cursor: pointer; font-weight: 800; }
+    .nav.active { border-radius: 12px; color: #ffffff; background: #55c3d4; }
+    @media (max-width: 620px) { header { min-height: 62px; padding: 10px 16px; } .brand { font-size: 20px; } .tag { display: none; } main { padding: 16px; } .hero { display: block; } .hero button { margin-top: 14px; } .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <section class="auth" id="authGate">
     <div class="auth-card">
-      <h2>바다야 놀자</h2>
-      <p>부산 바다 여행을 시작해보세요.</p>
-      <input type="email" placeholder="이메일" aria-label="이메일">
-      <input type="password" placeholder="비밀번호" aria-label="비밀번호">
-      <button class="primary" id="loginButton">로그인</button>
-      <button class="ghost" id="signupButton">회원가입</button>
-      <button class="ghost" id="guestButton">로그인/회원가입 없이 사용하기</button>
+      <h2>BADAYA NOLJA</h2>
+      <p>Busan beach travel community</p>
+      <input type="email" placeholder="Email" aria-label="Email">
+      <input type="password" placeholder="Password" aria-label="Password">
+      <button class="primary" id="loginButton" type="button">Log in</button>
+      <button class="ghost" id="signupButton" type="button">Sign up</button>
+      <button class="ghost" id="guestButton" type="button">Continue as guest</button>
     </div>
   </section>
   <div class="app">
-    <header><div class="brand">🌊 바다야 놀자</div><div class="tag">부산 바다 여행 커뮤니티</div></header>
+    <header><div class="brand">BADAYA NOLJA</div><div class="tag">Busan beach travel community</div></header>
     <main>
       <section class="page active" id="homePage">
-        <div class="card hero"><div><h1>나는 지금 <select id="region"><option>광안리</option><option>해운대</option><option>송정</option><option>다대포</option><option>송도</option><option>일광</option><option>임랑</option></select> 바다다!</h1><p>오늘의 바다 정보와 여행 추천을 확인하세요.</p></div><button class="primary" id="calendarButton">🗓 바다 일정 달력</button></div>
-        <div class="categories"><div class="category">🍜 맛집</div><div class="category">🛏 숙박</div><div class="category">🏄 활동</div></div>
-        <div class="card"><b>이 바다의 추천</b><div class="list"><div class="item"><b>바다 산책 코스</b>여유롭게 둘러보기 좋은 해변 산책 코스입니다.</div><div class="item"><b>오늘의 여행 팁</b>날씨와 현장 상황은 출발 전 한 번 더 확인하세요.</div></div></div>
+        <div class="card hero"><div><h1>Welcome to BADAYA NOLJA</h1><p>The safe recovery page is running. Main navigation is ready.</p></div><button class="primary" id="calendarButton" type="button">Sea calendar</button></div>
+        <div class="grid"><div class="tile">Food</div><div class="tile">Stay</div><div class="tile">Activities</div></div>
       </section>
-      <section class="page" id="mapPage"><div class="card"><h2>해변 지도</h2><div class="map-box">지도 기능은 복구 후 다시 연결됩니다.<br>현재 선택 지역: <span id="mapRegion">광안리</span></div></div></section>
-      <section class="page" id="communityPage"><div class="card"><h2>커뮤니티</h2><p>실시간 커뮤니티 연동을 안전하게 다시 연결하는 중입니다.</p><div class="notice">기존 게시물 데이터는 삭제되지 않았습니다.</div></div></section>
-      <section class="page" id="myPage"><div class="card"><h2>마이 페이지</h2><p>프로필과 여행 취향 설정은 다음 단계에서 다시 연결됩니다.</p></div></section>
+      <section class="page" id="mapPage"><div class="card"><h2>Map</h2><div class="map-box">Map service will be restored after the main page is stable.</div></div></section>
+      <section class="page" id="communityPage"><div class="card"><h2>Community</h2><p>Community data is preserved. The live connection will be restored after the safe page is confirmed.</p></div></section>
+      <section class="page" id="myPage"><div class="card"><h2>My page</h2><p>Profile and preferences will be restored next.</p></div></section>
     </main>
-    <nav><button class="nav active" data-page="homePage">⌂ 홈</button><button class="nav" data-page="mapPage">🗺 지도</button><button class="nav" data-page="communityPage">👥 커뮤니티</button><button class="nav" data-page="myPage">◉ 마이</button></nav>
+    <nav>
+      <button class="nav active" data-page="homePage" type="button">Home</button>
+      <button class="nav" data-page="mapPage" type="button">Map</button>
+      <button class="nav" data-page="communityPage" type="button">Community</button>
+      <button class="nav" data-page="myPage" type="button">My</button>
+    </nav>
   </div>
   <script>
-    const gate=document.getElementById('authGate');
-    ['loginButton','signupButton','guestButton'].forEach(id=>document.getElementById(id).addEventListener('click',()=>gate.hidden=true));
-    document.querySelectorAll('.nav').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));button.classList.add('active');document.getElementById(button.dataset.page).classList.add('active');}));
-    document.getElementById('region').addEventListener('change',event=>document.getElementById('mapRegion').textContent=event.target.value);
-    document.getElementById('calendarButton').addEventListener('click',()=>window.open('https://lhj-cmyk.github.io/sea-calendar/','_blank','noopener'));
+    (function () {
+      var gate = document.getElementById('authGate');
+      ['loginButton', 'signupButton', 'guestButton'].forEach(function (id) {
+        document.getElementById(id).addEventListener('click', function () { gate.hidden = true; });
+      });
+      Array.prototype.forEach.call(document.querySelectorAll('.nav'), function (button) {
+        button.addEventListener('click', function () {
+          Array.prototype.forEach.call(document.querySelectorAll('.nav'), function (item) { item.classList.remove('active'); });
+          Array.prototype.forEach.call(document.querySelectorAll('.page'), function (item) { item.classList.remove('active'); });
+          button.classList.add('active');
+          document.getElementById(button.getAttribute('data-page')).classList.add('active');
+        });
+      });
+      document.getElementById('calendarButton').addEventListener('click', function () {
+        window.open('https://lhj-cmyk.github.io/sea-calendar/', '_blank', 'noopener');
+      });
+    }());
   </script>
 </body>
 </html>
