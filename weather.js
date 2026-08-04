@@ -48,11 +48,11 @@
     const container = document.getElementById('hourlyForecast');
     const start = data.hourly.time.findIndex(time => time === currentTime);
     const first = start >= 0 ? start : 0;
-    const cards = Array.from({ length: 6 }, (_, offset) => {
-      const i = first + offset;
+    const cards = Array.from({ length: 7 }, (_, offset) => {
+      const i = first + (offset * 4);
       const hour = new Date(data.hourly.time[i]).getHours();
       const [label, icon] = weatherCodes[data.hourly.weather_code[i]] || ['날씨 정보', '🌊'];
-      return `<div class="w-16 shrink-0 rounded-2xl bg-[#f6fdff] p-2"><b>${offset === 0 ? '지금' : hour + '시'}</b><span class="block text-xl my-1">${icon}</span><span class="block font-bold text-[#167b8d]">${Math.round(data.hourly.temperature_2m[i])}°</span><small>${data.hourly.precipitation_probability[i] ?? 0}%</small><span class="sr-only">${label}</span></div>`;
+      return `<div class="w-16 shrink-0 rounded-2xl bg-[#f6fdff] p-2"><b>${offset === 0 ? '지금' : '+' + (offset * 4) + 'h'}</b><span class="block text-[10px] mt-1 text-[#6e929b]">${hour}시</span><span class="block text-xl my-1">${icon}</span><span class="block font-bold text-[#167b8d]">${Math.round(data.hourly.temperature_2m[i])}°</span><small>${data.hourly.precipitation_probability[i] ?? 0}%</small><span class="sr-only">${label}</span></div>`;
     });
     container.innerHTML = `<div class="hourly-row flex gap-2 text-center text-xs text-[#6e929b]">${cards.join('')}</div>`;
   }
@@ -70,7 +70,7 @@
       const query = new URLSearchParams({
         latitude: point.lat, longitude: point.lng,
         current: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m',
-        hourly: 'temperature_2m,weather_code,precipitation_probability', timezone: 'Asia/Seoul', forecast_days: '1'
+        hourly: 'temperature_2m,weather_code,precipitation_probability', timezone: 'Asia/Seoul', forecast_days: '2'
       });
       const response = await fetch(`https://api.open-meteo.com/v1/forecast?${query}`);
       if (!response.ok) throw new Error('weather request failed');
