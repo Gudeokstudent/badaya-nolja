@@ -1,0 +1,1 @@
+document.addEventListener('DOMContentLoaded',()=>{const bind=()=>{document.querySelectorAll('.pref').forEach(b=>{b.type='button';b.onclick=()=>b.classList.toggle('active')})};bind();setTimeout(bind,500);});
