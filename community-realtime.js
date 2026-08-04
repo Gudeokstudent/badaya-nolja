@@ -13,6 +13,7 @@ const postForm = document.getElementById('postForm');
 const modal = document.getElementById('modal');
 let posts = [];
 let activeFilter = 'all';
+let selectedImageFile = null;
 const likesByPost = new Map();
 const commentsByPost = new Map();
 const subscriptions = new Map();
@@ -33,6 +34,32 @@ function getAuthor() {
 function formatTime(value) {
   return value?.toDate ? value.toDate().toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '방금 전';
 }
+function setupPhotoInput() {
+  if (document.getElementById('postImage')) return;
+  const field = document.createElement('div');
+  field.className = 'mb-3';
+  field.innerHTML = '<label class="pill flex cursor-pointer items-center justify-center gap-2 px-3 py-3 text-sm font-bold text-[#167b8d]">📷 사진 추가<input id="postImage" type="file" accept="image/*" class="hidden"></label><img id="postImagePreview" class="hidden mt-3 max-h-56 w-full rounded-2xl object-cover" alt="선택한 사진 미리보기"><p class="mt-2 text-xs text-[#76a4ae]">사진은 자동으로 최적화되어 업로드됩니다.</p>';
+  postForm.querySelector('button').before(field);
+  document.getElementById('postImage').onchange = (event) => {
+    selectedImageFile = event.target.files?.[0] || null;
+    const preview = document.getElementById('postImagePreview');
+    if (!selectedImageFile) { preview.classList.add('hidden'); return; }
+    preview.src = URL.createObjectURL(selectedImageFile);
+    preview.classList.remove('hidden');
+  };
+}
+async function optimizePhoto(file) {
+  if (!file) return null;
+  if (!file.type.startsWith('image/')) throw new Error('image only');
+  const source = await new Promise((resolve, reject) => { const image = new Image(); image.onload = () => resolve(image); image.onerror = reject; image.src = URL.createObjectURL(file); });
+  const scale = Math.min(1, 1080 / Math.max(source.naturalWidth, source.naturalHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(source.naturalWidth * scale); canvas.height = Math.round(source.naturalHeight * scale);
+  const context = canvas.getContext('2d'); context.fillStyle = '#ffffff'; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(source, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+  if (dataUrl.length > 700000) throw new Error('image too large');
+  return dataUrl;
+}
 function subscribePostDetails(postId) {
   if (subscriptions.has(postId)) return;
   subscriptions.set(postId, []);
@@ -50,7 +77,8 @@ function postHtml(post) {
   const like = likesByPost.get(post.id) || { count: 0, liked: false };
   const comments = commentsByPost.get(post.id) || [];
   const commentsHtml = comments.length ? comments.map((comment) => `<li class="rounded-xl bg-[#f5fdff] px-3 py-2"><b class="text-[#167b8d]">${escapeHtml(comment.author)}</b><span class="ml-2">${escapeHtml(comment.body)}</span><small class="block mt-1 text-[#9bbbc1]">${formatTime(comment.createdAt)}</small></li>`).join('') : '';
-  return `<article class="cloud p-4"><div class="flex items-center justify-between gap-3"><span class="text-xs font-black ${post.post_type === 'EVENT' ? 'text-[#ef8c63]' : 'text-[#55aebc]'}">&lt;${escapeHtml(post.post_type)}&gt;</span><span class="text-[10px] text-[#a5c3c8]">${formatTime(post.createdAt)}</span></div><h3 class="font-black mt-1">${escapeHtml(post.title)}</h3><p class="text-sm text-[#6e929b] mt-2 whitespace-pre-wrap">${escapeHtml(post.body)}</p><p class="text-[10px] text-[#6ca9b4] mt-3">${escapeHtml(post.author)}</p><div class="flex items-center gap-2 mt-4"><button class="likeButton pill px-3 py-2 text-sm font-bold ${like.liked ? 'active' : ''}" data-post-id="${post.id}" aria-label="좋아요">${like.liked ? '♥' : '♡'} 좋아요 <span>${like.count}</span></button><span class="text-xs text-[#76a4ae]">댓글 ${comments.length}</span></div><ul class="space-y-2 mt-3">${commentsHtml}</ul><form class="commentForm flex gap-2 mt-3" data-post-id="${post.id}"><input required maxlength="300" class="min-w-0 flex-1 rounded-xl border border-[#b9e7ed] px-3 py-2 text-sm" placeholder="답글을 남겨보세요"><button class="rounded-xl bg-[#55cadb] text-white px-3 text-sm font-bold">등록</button></form></article>`;
+  const photo = /^data:image\/(jpeg|png|webp);base64,/.test(post.imageData || '') ? `<img src="${post.imageData}" class="mt-3 max-h-[420px] w-full rounded-2xl object-cover" alt="게시물 사진">` : '';
+  return `<article class="cloud p-4"><div class="flex items-center justify-between gap-3"><span class="text-xs font-black ${post.post_type === 'EVENT' ? 'text-[#ef8c63]' : 'text-[#55aebc]'}">&lt;${escapeHtml(post.post_type)}&gt;</span><span class="text-[10px] text-[#a5c3c8]">${formatTime(post.createdAt)}</span></div><h3 class="font-black mt-1">${escapeHtml(post.title)}</h3><p class="text-sm text-[#6e929b] mt-2 whitespace-pre-wrap">${escapeHtml(post.body)}</p>${photo}<p class="text-[10px] text-[#6ca9b4] mt-3">${escapeHtml(post.author)}</p><div class="flex items-center gap-2 mt-4"><button class="likeButton pill px-3 py-2 text-sm font-bold ${like.liked ? 'active' : ''}" data-post-id="${post.id}" aria-label="좋아요">${like.liked ? '♥' : '♡'} 좋아요 <span>${like.count}</span></button><span class="text-xs text-[#76a4ae]">댓글 ${comments.length}</span></div><ul class="space-y-2 mt-3">${commentsHtml}</ul><form class="commentForm flex gap-2 mt-3" data-post-id="${post.id}"><input required maxlength="300" class="min-w-0 flex-1 rounded-xl border border-[#b9e7ed] px-3 py-2 text-sm" placeholder="답글을 남겨보세요"><button class="rounded-xl bg-[#55cadb] text-white px-3 text-sm font-bold">등록</button></form></article>`;
 }
 function render() {
   const visible = posts.filter((post) => activeFilter === 'all' || post.post_type === activeFilter);
@@ -99,6 +127,7 @@ document.querySelectorAll('.communityFilter').forEach((button) => button.onclick
 });
 document.getElementById('openModal').onclick = () => { document.getElementById('communityStatus')?.remove(); modal.classList.remove('hidden'); };
 document.getElementById('closeModal').onclick = () => modal.classList.add('hidden');
+setupPhotoInput();
 postForm.onsubmit = async (event) => {
   event.preventDefault();
   const title = document.getElementById('postTitle').value.trim();
@@ -106,7 +135,8 @@ postForm.onsubmit = async (event) => {
   const post_type = document.getElementById('postType').value;
   if (!title || !body) return showMessage('제목과 내용을 모두 입력해 주세요.');
   try {
-    await addDoc(collection(db, 'community_posts'), { title, body, post_type, author: getAuthor(), createdAt: serverTimestamp() });
-    postForm.reset(); modal.classList.add('hidden');
-  } catch (error) { console.error('Community post failed:', error); showMessage('글을 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.'); }
+    const imageData = await optimizePhoto(selectedImageFile);
+    await addDoc(collection(db, 'community_posts'), { title, body, post_type, author: getAuthor(), imageData, createdAt: serverTimestamp() });
+    postForm.reset(); selectedImageFile = null; document.getElementById('postImagePreview')?.classList.add('hidden'); modal.classList.add('hidden');
+  } catch (error) { console.error('Community post failed:', error); showMessage(error.message === 'image too large' ? '사진 크기가 너무 큽니다. 다른 사진을 선택해 주세요.' : '글을 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.'); }
 };
