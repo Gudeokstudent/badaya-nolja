@@ -1,5 +1,13 @@
 (() => {
-  const dict={en:{'홈':'Home','지도':'Map','커뮤니티':'Community','추천':'Recommend','마이':'My','맛집':'Restaurants','숙박':'Hotels','활동':'Activities','전체':'All','글쓰기':'Write','화장실':'Restroom','주차장':'Parking','쓰레기통':'Trash bin','인구밀집도':'Crowding','시간별 예보':'Hourly forecast','현재 날씨':'Current weather','선호 테마 선택':'Choose preferences'},ja:{'홈':'ホーム','지도':'地図','커뮤니티':'コミュニティ','추천':'おすすめ','마이':'マイページ','맛집':'グルメ','숙박':'宿泊','활동':'アクティビティ','전체':'全て','글쓰기':'投稿','화장실':'トイレ','주차장':'駐車場','쓰레기통':'ゴミ箱','인구밀집도':'混雑度','시간별 예보':'時間別予報','현재 날씨':'現在の天気','선호 테마 선택':'好みを選択'},zh:{'홈':'首页','지도':'地图','커뮤니티':'社区','추천':'推荐','마이':'我的','맛집':'美食','숙박':'住宿','활동':'活动','전체':'全部','글쓰기':'发帖','화장실':'卫生间','주차장':'停车场','쓰레기통':'垃圾桶','인구밀집도':'拥挤度','시간별 예보':'逐小时预报','현재 날씨':'当前天气','선호 테마 선택':'选择偏好'}};
-  const run=()=>{const lang=localStorage.getItem('badayaLang')||'ko';if(lang==='ko')return;const map=dict[lang]||{};document.querySelectorAll('button,nav span,label,h1,h2,h3,p,option').forEach(el=>{if(el.children.length===0){const s=el.textContent.trim();if(map[s])el.textContent=map[s];}});document.querySelectorAll('input,textarea').forEach(el=>{const s=el.placeholder?.trim();if(map[s])el.placeholder=map[s];});};
-  window.addEventListener('badaya-language-change',run); document.addEventListener('DOMContentLoaded',()=>{run();setInterval(run,800);});
+  const regions={광안리:'Gwangalli',해운대:'Haeundae',송정:'Songjeong',다대포:'Dadaepo',송도:'Songdo',일광:'Ilgwang',임랑:'Imrang'};
+  const words={홈:'Home',지도:'Map',커뮤니티:'Community',추천:'Recommend',마이:'My',맛집:'Restaurants',숙박:'Hotels',활동:'Activities',전체:'All',글쓰기:'Write post',화장실:'Restroom',주차장:'Parking',휴지통:'Trash bin',인구밀집:'Crowding',인구밀집도:'Crowding',지도:'Map',스카이뷰:'Sky view',평점순:'By rating','5분 자동 갱신':'Auto-refresh every 5 min', '나는 지금':'I am at', '바다다!':' beach!','NAVER RANKING':'NAVER RANKING','이 바다의 TOP 3':'TOP 3 for this beach','선호 테마 선택':'Choose travel preferences'};
+  const translate=(text,lang)=>lang==='en'?(regions[text]||words[text]||text):text;
+  const run=()=>{
+    const lang=localStorage.getItem('badayaLang')||'ko'; if(lang!=='en') return;
+    document.querySelectorAll('select').forEach(select=>{[...select.options].forEach(o=>{o.textContent=translate(o.value||o.textContent.trim(),lang)});});
+    document.querySelectorAll('button,nav span,label,h1,h2,h3,p,small,span,a').forEach(el=>{if(el.children.length===0){const s=el.textContent.trim();if(words[s])el.textContent=words[s];else if(regions[s])el.textContent=regions[s];}});
+    document.querySelectorAll('input,textarea').forEach(el=>{if(words[el.placeholder?.trim()])el.placeholder=words[el.placeholder.trim()];});
+    document.querySelectorAll('.overlay-label,.facility-label,.place-label').forEach(el=>{let s=el.textContent;Object.entries(regions).forEach(([ko,en])=>s=s.replaceAll(ko,en));el.textContent=s;});
+  };
+  window.addEventListener('badaya-language-change',run); document.addEventListener('change',e=>{if(e.target.id==='myLanguage'){localStorage.setItem('badayaLang',e.target.value);run();}}); document.addEventListener('DOMContentLoaded',()=>{run();setInterval(run,700);});
 })();
