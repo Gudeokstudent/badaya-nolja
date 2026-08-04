@@ -58,19 +58,12 @@
     const signupForm = document.getElementById('signupForm');
     const loginForm = document.getElementById('loginForm');
     const finishButton = document.getElementById('finishSignup');
-    const guestButton = document.getElementById('guestAccess');
     // Replace the page's old demo-only handlers with the real authentication flow.
     if (signupForm) signupForm.onsubmit = null;
     if (loginForm) loginForm.onsubmit = null;
     if (finishButton) finishButton.onclick = null;
     const signupButton = signupForm?.querySelector('button');
     if (signupButton) signupButton.textContent = '회원가입';
-
-    guestButton?.addEventListener('click', () => {
-      const profile = JSON.parse(localStorage.getItem('badayaPendingProfile') || '{}');
-      if (!profile.nickname) localStorage.setItem('badayaPendingProfile', JSON.stringify({ nickname: '바다친구' }));
-      enter();
-    });
 
     signupForm?.addEventListener('submit', async (event) => {
       event.preventDefault();
