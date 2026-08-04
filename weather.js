@@ -14,7 +14,7 @@
     80: ['소나기', '🌦️'], 81: ['소나기', '🌦️'], 82: ['강한 소나기', '⛈️'], 95: ['뇌우', '⛈️']
   };
   const style = document.createElement('style');
-  style.textContent = `.weather-sketch{display:block;width:48px;height:48px;background-image:url('assets/weather-icons.png');background-size:300px auto;filter:invert(1);mix-blend-mode:multiply}.weather-sketch.drop{background-position:-32px -58px}.weather-sketch.wind{background-position:-126px -58px}.weather-sketch.temp{background-position:-226px -58px}.hourly-scroll{overflow-x:auto;scrollbar-width:thin}.hourly-row{min-width:max-content}`;
+  style.textContent = `.weather-sketch{display:block;width:48px;height:48px;background-image:url('weather-icons.png');background-size:300px auto;filter:invert(1);mix-blend-mode:multiply}.weather-sketch.drop{background-position:-32px -58px}.weather-sketch.wind{background-position:-126px -58px}.weather-sketch.temp{background-position:-226px -58px}.hourly-scroll{overflow-x:auto;scrollbar-width:thin}.hourly-row{min-width:max-content}`;
   document.head.appendChild(style);
   let requestSerial = 0;
 
