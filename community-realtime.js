@@ -152,7 +152,7 @@ postForm.onsubmit = async (event) => {
   if (!title || !body) return showMessage('제목과 내용을 모두 입력해 주세요.');
   try {
     const imageData = await optimizePhoto(selectedImageFile);
-    const postData = { title, body, post_type, author: getAuthor(), createdAt: serverTimestamp() };
+    const postData = { title, body, post_type, author: getAuthor(), authorId: visitorId, createdAt: serverTimestamp() };
     if (imageData) postData.imageData = imageData;
     await addDoc(collection(db, 'community_posts'), postData);
     postForm.reset(); selectedImageFile = null; document.getElementById('postImagePreview')?.classList.add('hidden'); modal.classList.add('hidden');
