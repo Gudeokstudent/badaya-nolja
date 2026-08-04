@@ -154,7 +154,12 @@ postForm.onsubmit = async (event) => {
     const imageData = await optimizePhoto(selectedImageFile);
     const postData = { title, body, post_type, author: getAuthor(), authorId: visitorId, createdAt: serverTimestamp() };
     if (imageData) postData.imageData = imageData;
-    await addDoc(collection(db, 'community_posts'), postData);
+    try { await addDoc(collection(db, 'community_posts'), postData); }
+    catch (writeError) {
+      if (writeError?.code !== 'permission-denied') throw writeError;
+      delete postData.authorId;
+      await addDoc(collection(db, 'community_posts'), postData);
+    }
     postForm.reset(); selectedImageFile = null; document.getElementById('postImagePreview')?.classList.add('hidden'); modal.classList.add('hidden');
   } catch (error) { console.error('Community post failed:', error); showMessage(error.message === 'image too large' ? '사진 크기가 너무 큽니다. 다른 사진을 선택해 주세요.' : '글을 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.'); }
 };
