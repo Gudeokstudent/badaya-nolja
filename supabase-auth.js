@@ -67,6 +67,7 @@
 
     signupForm?.addEventListener('submit', async (event) => {
       event.preventDefault();
+      event.stopImmediatePropagation();
       const id = document.getElementById('signupId')?.value.trim() || '';
       const password = signupForm.querySelector('input[type="password"]')?.value || '';
       const nickname = document.getElementById('nickname')?.value.trim() || '';
@@ -86,10 +87,11 @@
       } finally {
         if (signupButton) signupButton.disabled = false;
       }
-    });
+    }, { capture: true });
 
     loginForm?.addEventListener('submit', async (event) => {
       event.preventDefault();
+      event.stopImmediatePropagation();
       const id = document.getElementById('loginId')?.value.trim() || '';
       const password = loginForm.querySelector('input[type="password"]')?.value || '';
       if (!id || !password) return showMessage('이메일과 비밀번호를 입력해 주세요.');
@@ -107,9 +109,10 @@
       } finally {
         if (loginButton) loginButton.disabled = false;
       }
-    });
+    }, { capture: true });
 
-    finishButton?.addEventListener('click', async () => {
+    finishButton?.addEventListener('click', async (event) => {
+      event.stopImmediatePropagation();
       const preferences = [...document.querySelectorAll('.pref.active')].map((element) => element.textContent.trim());
       const session = readSession();
       const profile = JSON.parse(localStorage.getItem('badayaPendingProfile') || '{}');
@@ -134,7 +137,7 @@
       }
       localStorage.setItem('badayaPrefs', JSON.stringify(preferences));
       enter();
-    });
+    }, { capture: true });
 
     if (readSession()?.access_token) enter();
   };
