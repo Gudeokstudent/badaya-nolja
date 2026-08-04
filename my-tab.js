@@ -1,34 +1,22 @@
-(() => {
-  function getProfile() {
-    try { return JSON.parse(localStorage.getItem('badayaPendingProfile') || '{}'); }
-    catch { return {}; }
-  }
-  function renderMyTab() {
-    const profile = getProfile();
-    const name = profile.nickname || '바다친구';
-    const prefs = JSON.parse(localStorage.getItem('badayaPrefs') || '[]');
-    const region = document.getElementById('homeRegion')?.value || '광안리';
-    document.getElementById('myNickname').textContent = name;
-    document.getElementById('myBeach').textContent = `${region} 바다를 보고 있어요`;
-    document.getElementById('myPreferences').innerHTML = prefs.length
-      ? prefs.map((item) => `<span class="pill px-3 py-2 text-sm font-bold text-[#167b8d]">${item}</span>`).join('')
-      : '<p class="text-sm text-[#76a4ae]">아직 선택한 여행 취향이 없어요.</p>';
-  }
-  document.addEventListener('DOMContentLoaded', () => {
-    const nav = document.querySelector('nav');
-    const main = document.querySelector('main');
-    if (!nav || !main || document.getElementById('myPage')) return;
-    const tab = document.createElement('button');
-    tab.className = 'nav flex flex-col items-center gap-1 text-xs font-bold w-1/5';
-    tab.dataset.page = 'myPage';
-    tab.innerHTML = '👤<span>마이</span>';
-    nav.querySelectorAll('.nav').forEach((item) => { item.classList.remove('w-1/3', 'w-1/4'); item.classList.add('w-1/5'); });
-    nav.appendChild(tab);
-    const page = document.createElement('section');
-    page.id = 'myPage';
-    page.className = 'page hidden';
-    page.innerHTML = '<div class="cloud p-5"><div class="flex items-center gap-4"><div class="grid h-16 w-16 place-items-center rounded-full bg-[#d9f8fc] text-3xl">🌊</div><div><p class="text-xs font-black text-[#72a8b2]">MY BADAYA</p><h2 id="myNickname" class="mt-1 text-2xl font-black text-[#167b8d]"></h2><p id="myBeach" class="mt-1 text-sm text-[#6e929b]"></p></div></div><div class="mt-6 border-t border-[#d8f1f4] pt-5"><p class="text-sm font-black text-[#214553]">나의 여행 취향</p><div id="myPreferences" class="mt-3 flex flex-wrap gap-2"></div></div><div class="mt-6 grid grid-cols-2 gap-3"><div class="rounded-2xl bg-[#effcff] p-4"><p class="text-xs font-bold text-[#72a8b2]">커뮤니티</p><p class="mt-1 font-black text-[#167b8d]">바다 이야기 나누기</p></div><div class="rounded-2xl bg-[#effcff] p-4"><p class="text-xs font-bold text-[#72a8b2]">오늘의 바다</p><p class="mt-1 font-black text-[#167b8d]">안전하게 즐기세요</p></div></div></div>';
-    main.appendChild(page);
-    tab.onclick = () => { document.querySelectorAll('.nav').forEach((item) => item.classList.remove('active')); tab.classList.add('active'); document.querySelectorAll('.page').forEach((item) => item.classList.add('hidden')); page.classList.remove('hidden'); renderMyTab(); };
-  });
-})();
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js';
+
+const firebaseConfig = { apiKey:'AIzaSyCI8iei-gL3kUIEhPlcoOjAVjvWRJ6dezQ', authDomain:'badaya-nolja-de9e3.firebaseapp.com', projectId:'badaya-nolja-de9e3', storageBucket:'badaya-nolja-de9e3.firebasestorage.app', messagingSenderId:'656188796031', appId:'1:656188796031:web:4bef368a6bdbcef4dba34a' };
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const translations = {
+  ko:{my:'마이페이지',edit:'프로필 수정',pref:'선호 테마',activity:'활동 내역',language:'언어 및 지역',theme:'테마',light:'라이트 모드',dark:'다크 모드',nickname:'닉네임',beach:'최근 선택 해변',empty:'아직 작성한 글이 없어요.',save:'저장'},
+  en:{my:'MY PAGE',edit:'Edit profile',pref:'Travel preferences',activity:'Activity history',language:'Language & region',theme:'Theme',light:'Light mode',dark:'Dark mode',nickname:'Nickname',beach:'Recent beach',empty:'You have not written a post yet.',save:'Save'},
+  ja:{my:'マイページ',edit:'プロフィール編集',pref:'旅行の好み',activity:'活動履歴',language:'言語と地域',theme:'テーマ',light:'ライトモード',dark:'ダークモード',nickname:'ニックネーム',beach:'最近のビーチ',empty:'まだ投稿がありません。',save:'保存'},
+  zh:{my:'我的页面',edit:'编辑个人资料',pref:'旅行偏好',activity:'活动记录',language:'语言和地区',theme:'主题',light:'浅色模式',dark:'深色模式',nickname:'昵称',beach:'最近选择的海滩',empty:'还没有发布内容。',save:'保存'}
+};
+const preferences = ['스릴','맛집','풍경','휴양','액티비티','카페','역사·문화','사진 명소','가족 여행','친구 여행'];
+const getProfile = () => { try{return JSON.parse(localStorage.getItem('badayaPendingProfile')||'{}')}catch{return{}} };
+const t = (key) => (translations[localStorage.getItem('badayaLang')||'ko']||translations.ko)[key];
+function saveProfile(name){const profile=getProfile();profile.nickname=name;localStorage.setItem('badayaPendingProfile',JSON.stringify(profile));}
+function applyTheme(){document.documentElement.dataset.theme=localStorage.getItem('badayaTheme')||'light';}
+function applyThemeStyles(){const style=document.createElement('style');style.textContent=`html[data-theme="dark"] body{background:#071c25;color:#e6faff}html[data-theme="dark"] .app,html[data-theme="dark"] .auth-gate{background:linear-gradient(180deg,#092c38,#071c25)!important}html[data-theme="dark"] .cloud,html[data-theme="dark"] .auth-card,html[data-theme="dark"] .pill{background:#102f3a!important;color:#e6faff;border-color:#27606e}html[data-theme="dark"] .text-[#214553],html[data-theme="dark"] .text-[#167b8d]{color:#9debf5!important}html[data-theme="dark"] input,html[data-theme="dark"] select{background:#102f3a!important;color:#e6faff}`;document.head.appendChild(style);applyTheme();}
+function renderActivity(){const name=getProfile().nickname||'바다친구';const list=document.getElementById('myActivity');getDocs(query(collection(db,'community_posts'),where('author','==',name),orderBy('createdAt','desc'),limit(10))).then((snap)=>{list.innerHTML=snap.empty?`<p class="text-sm text-[#76a4ae]">${t('empty')}</p>`:snap.docs.map((item)=>`<article class="rounded-2xl bg-[#effcff] p-3"><p class="text-xs font-bold text-[#72a8b2]">${item.data().post_type||'POST'}</p><p class="mt-1 font-bold text-[#214553]">${item.data().title||''}</p><p class="mt-1 text-sm text-[#6e929b]">${item.data().body||''}</p></article>`).join('');}).catch(()=>{list.innerHTML=`<p class="text-sm text-[#76a4ae]">${t('empty')}</p>`;});}
+function renderMyTab(){const profile=getProfile(),name=profile.nickname||'바다친구',prefs=JSON.parse(localStorage.getItem('badayaPrefs')||'[]'),lang=localStorage.getItem('badayaLang')||'ko',theme=localStorage.getItem('badayaTheme')||'light';document.getElementById('myTitle').textContent=t('my');document.getElementById('myNickname').textContent=name;document.getElementById('myBeach').textContent=`${t('beach')}: ${document.getElementById('homeRegion')?.value||'광안리'}`;document.getElementById('myPrefLabel').textContent=t('pref');document.getElementById('myActivityLabel').textContent=t('activity');document.getElementById('myLanguageLabel').textContent=t('language');document.getElementById('myThemeLabel').textContent=t('theme');document.getElementById('editProfile').textContent=t('edit');document.getElementById('myPreferences').innerHTML=prefs.length?prefs.map((item)=>`<span class="pill px-3 py-2 text-sm font-bold text-[#167b8d]">${item}</span>`).join(''):`<span class="text-sm text-[#76a4ae]">${t('empty')}</span>`;document.getElementById('myLanguage').value=lang;document.getElementById('myTheme').value=theme;renderActivity();}
+function buildPage(){const nav=document.querySelector('nav'),main=document.querySelector('main');if(!nav||!main||document.getElementById('myPage'))return;const tab=document.createElement('button');tab.className='nav flex flex-col items-center gap-1 text-xs font-bold w-1/5';tab.dataset.page='myPage';tab.innerHTML='👤<span>마이</span>';nav.querySelectorAll('.nav').forEach((item)=>{item.classList.remove('w-1/3','w-1/4');item.classList.add('w-1/5')});nav.appendChild(tab);const page=document.createElement('section');page.id='myPage';page.className='page hidden';page.innerHTML=`<div class="cloud p-5"><div class="flex items-center justify-between"><div class="flex items-center gap-4"><div class="grid h-16 w-16 place-items-center rounded-full bg-[#d9f8fc] text-3xl">🌊</div><div><p id="myTitle" class="text-xs font-black text-[#72a8b2]"></p><h2 id="myNickname" class="mt-1 text-2xl font-black text-[#167b8d]"></h2><p id="myBeach" class="mt-1 text-sm text-[#6e929b]"></p></div></div><button id="editProfile" class="pill px-3 py-2 text-xs font-bold"></button></div><div class="mt-6 border-t border-[#d8f1f4] pt-5"><p id="myPrefLabel" class="text-sm font-black"></p><div id="myPreferences" class="mt-3 flex flex-wrap gap-2"></div><button id="editPrefs" class="pill mt-3 px-3 py-2 text-xs font-bold">취향 수정</button></div><div class="mt-6 border-t border-[#d8f1f4] pt-5"><p id="myActivityLabel" class="text-sm font-black"></p><div id="myActivity" class="mt-3 space-y-2"></div></div><div class="mt-6 border-t border-[#d8f1f4] pt-5"><p id="myLanguageLabel" class="text-sm font-black"></p><div class="mt-3 grid grid-cols-2 gap-2"><select id="myLanguage" class="pill px-3 py-3 text-sm"><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="zh">中文</option></select><select id="myRegionSetting" class="pill px-3 py-3 text-sm"><option>부산</option><option>서울</option><option>제주</option><option>도쿄</option><option>상하이</option></select></div></div><div class="mt-6 border-t border-[#d8f1f4] pt-5"><p id="myThemeLabel" class="text-sm font-black"></p><select id="myTheme" class="pill mt-3 w-full px-3 py-3 text-sm"><option value="light">☀️ ${t('light')}</option><option value="dark">🌙 ${t('dark')}</option></select></div></div>`;main.appendChild(page);tab.onclick=()=>{document.querySelectorAll('.nav').forEach((item)=>item.classList.remove('active'));tab.classList.add('active');document.querySelectorAll('.page').forEach((item)=>item.classList.add('hidden'));page.classList.remove('hidden');renderMyTab();};document.getElementById('editProfile').onclick=()=>{const name=prompt(t('nickname'),getProfile().nickname||'바다친구');if(name?.trim()){saveProfile(name.trim());renderMyTab();}};document.getElementById('editPrefs').onclick=()=>{const current=JSON.parse(localStorage.getItem('badayaPrefs')||'[]'),value=prompt('선호 취향을 쉼표로 입력하세요',current.join(','));if(value!==null){localStorage.setItem('badayaPrefs',JSON.stringify(value.split(',').map((x)=>x.trim()).filter(Boolean)));renderMyTab();}};document.getElementById('myLanguage').onchange=(event)=>{localStorage.setItem('badayaLang',event.target.value);renderMyTab();};document.getElementById('myTheme').onchange=(event)=>{localStorage.setItem('badayaTheme',event.target.value);applyTheme();renderMyTab();};}
+applyThemeStyles();document.addEventListener('DOMContentLoaded',buildPage);
