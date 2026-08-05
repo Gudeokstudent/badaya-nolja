@@ -88,8 +88,6 @@
     function localSave(post){const items=localPosts();items.unshift(post);storage.setItem('badayaLocalPosts',JSON.stringify(items));}
     function setCommunityMessage(text,error=false){$('communityStatus').textContent=text;$('communityStatus').className=`status ${error?'error':'success'}`}
     let firestore=null,firestoreFns=null;
-    // Firebase 권한 오류가 있어도 프로토타입 글쓰기는 계속 사용할 수 있게 로컬 저장으로 전환합니다.
-    setInterval(()=>{ if(firestore) firestore=null; },500);
     async function initCommunity(){try{const [{initializeApp},{getFirestore,collection,addDoc,onSnapshot,orderBy,query,limit,doc,getDoc,setDoc,deleteDoc,serverTimestamp,updateDoc}]=await Promise.all([import('https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js'),import('https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js')]);firestore=getFirestore(initializeApp({apiKey:'AIzaSyCI8iei-gL3kUIEhPlcoOjAVjvWRJ6dezQ',authDomain:'badaya-nolja-de9e3.firebaseapp.com',projectId:'badaya-nolja-de9e3',storageBucket:'badaya-nolja-de9e3.firebasestorage.app',messagingSenderId:'656188796031',appId:'1:656188796031:web:4bef368a6bdbcef4dba34a'}));firestoreFns={collection,addDoc,onSnapshot,orderBy,query,limit,doc,getDoc,setDoc,deleteDoc,serverTimestamp,updateDoc};const feed=query(collection(firestore,'community_posts'),orderBy('createdAt','desc'),limit(100));onSnapshot(feed,snapshot=>{state.posts=snapshot.docs.map(item=>({id:item.id,...item.data()}));renderPosts();setCommunityMessage('실시간 커뮤니티에 연결되었습니다.');},error=>{console.error(error);state.posts=localPosts();renderPosts();setCommunityMessage('실시간 연결에 실패해 이 기기의 임시 게시글을 표시합니다.',true);});}catch(error){console.error(error);state.posts=localPosts();renderPosts();setCommunityMessage('커뮤니티 연결을 준비하지 못했습니다.',true)}}
     async function toggleLike(id){const post=state.posts.find(item=>item.id===id);if(!post)return;const likes={...(post.likes||{})};likes[state.visitorId]?delete likes[state.visitorId]:likes[state.visitorId]=true;post.likes=likes;renderPosts();if(firestore){try{await firestoreFns.updateDoc(firestoreFns.doc(firestore,'community_posts',id),{likes});}catch(error){setCommunityMessage('좋아요를 저장하지 못했습니다.',true)}}else{storage.setItem('badayaLocalPosts',JSON.stringify(state.posts));}}
     async function submitComment(event,id){event.preventDefault();const input=event.currentTarget.querySelector('input'),body=input.value.trim();if(!body)return;const post=state.posts.find(item=>item.id===id);if(!post)return;const comments=[...(post.comments||[]),{author:state.profile.name||'바다친구',body,createdAt:new Date().toISOString()}];post.comments=comments;input.value='';renderPosts();if(firestore){try{await firestoreFns.updateDoc(firestoreFns.doc(firestore,'community_posts',id),{comments});}catch(error){setCommunityMessage('댓글을 저장하지 못했습니다.',true)}}else storage.setItem('badayaLocalPosts',JSON.stringify(state.posts));}
@@ -120,6 +118,13 @@
         if (target) target.innerHTML = `<i aria-hidden="true" style="display:block;width:36px;height:36px;margin:0 auto 3px;color:#13849a"><svg viewBox="0 0 48 48" style="width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round">${svg}</svg></i><small>${label}</small>`;
       });
     })();
+  </script>
+  <script>
+    // 모바일 브라우저에서 새 창 차단을 피하고 현재 화면에서 달력을 엽니다.
+    document.addEventListener('DOMContentLoaded', () => {
+      const calendarButton = document.getElementById('openCalendar');
+      if (calendarButton) calendarButton.onclick = () => { window.location.href = 'https://lhj-cmyk.github.io/sea-calendar/'; };
+    });
   </script>
 </body>
 </html>
