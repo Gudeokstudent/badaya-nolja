@@ -133,5 +133,60 @@
       if (translateButton) translateButton.onclick = () => { window.location.href = 'https://translate.google.com/?sl=ko&tl=en&op=translate'; };
     });
   </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const themeData = [
+        ['K-POP·스타', ['스릴', '친구 여행'], ['강다니엘 코스', '강다니엘 모교', 'BTS 순례 코스', 'BTS가 방문한 부산 명소']],
+        ['야경·전망', ['풍경', '사진 명소', '친구 여행'], ['광안리해수욕장', '광안대교', '황령산 봉수대', '부산항대교 전망', '몰운대', '영도 청학배수지 전망대', '우암동 도시숲']],
+        ['바다·해양', ['풍경', '휴양', '액티비티'], ['해운대해수욕장', '광안리해수욕장', '송도해수욕장', '다대포해수욕장', '태종대', '오륙도', '영도 해안 산책로', '광안리 SUP Zone']],
+        ['역사·문화', ['역사·문화', '가족 여행'], ['부산근현대역사관', '임시수도기념관', '부산타워', '용두산공원', '유엔기념공원', '초량 근대문화길']],
+        ['도보·골목 여행', ['풍경', '사진 명소', '친구 여행'], ['감천문화마을', '흰여울문화마을', '경성대문화골목', '초량 이바구길', '산복도로', '구봉산 치유숲길', '북항 일대 문화공간']],
+        ['자연·힐링', ['휴양', '풍경', '가족 여행'], ['장산', '금정산', '이기대해안산책로', '몰운대', '구봉산 치유숲길', '낙동강하구 생태공원']],
+        ['생태·철새 탐방', ['자연', '가족 여행', '휴양'], ['을숙도', '낙동강하구', '삼락생태공원', '맥도생태공원', '대저생태공원', '낙동강하구 철새도래지']],
+        ['미술·전시·카페', ['카페', '역사·문화', '친구 여행'], ['부산시립미술관', '부산현대미술관', 'F1963', '영화의전당', '부산 갤러리카페', 'LP바·LP카페']],
+        ['가족·체험', ['가족 여행', '액티비티'], ['국립부산과학관', '부산어린이대공원', '키자니아 부산', '아쿠아리움', '영화의전당']],
+        ['섬·어촌·항구', ['풍경', '휴양', '가족 여행'], ['가덕도', '영도', '태종대', '오륙도', '다대포', '청사포', '기장 연안 어촌마을']],
+        ['음식·카페', ['맛집', '카페'], ['부산 비건 빵지순례', '부산 디저트 카페', '광안리 카페거리', '전포 카페거리', '영도 카페거리', '자갈치시장', '국제시장', '부평깡통시장']],
+        ['반려동물 동반 여행', ['풍경', '휴양'], ['해안 산책로', '광안리 일대', '이기대 일대', '영도 해안 산책로', '반려견 동반 카페·공원']]
+      ];
+      const button = document.getElementById('recommendButton');
+      if (!button) return;
+      button.onclick = () => {
+        let preferences = [];
+        try { preferences = JSON.parse(localStorage.getItem('badayaProfile') || '{}').preferences || []; } catch (error) {}
+        const ranked = themeData.map(([theme, tags, places]) => ({ theme, tags, places, score: tags.filter((tag) => preferences.includes(tag)).length })).sort((a, b) => b.score - a.score);
+        const modal = document.getElementById('recommendModal');
+        modal.innerHTML = `<div class="recommend-modal-inner"><div class="recommend-head"><div><p>MY BUSAN TRIP</p><h2>맞춤 여행지 추천</h2><span>${preferences.length ? preferences.join(' · ') : '아직 선택한 취향이 없어요'}</span></div><button id="closeRecommend" type="button">×</button></div><ol class="recommend-list">${ranked.map((item, index) => `<li><b>${index + 1}</b><div><h3>${item.theme}</h3><p>${item.places.slice(0, 4).join(' · ')}</p><small>${item.tags.map((tag) => '#' + tag).join(' ')}</small></div><a href="https://search.naver.com/search.naver?query=${encodeURIComponent(item.places[0] + ' 부산 여행')}" target="_blank" rel="noopener">네이버 검색</a></li>`).join('')}</ol></div>`;
+        modal.classList.remove('hidden');
+        document.getElementById('closeRecommend').onclick = () => modal.classList.add('hidden');
+      };
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const recommendationPlaces = [
+        ['광안리해수욕장',['풍경','사진 명소','친구 여행'],'야경·전망'],['황령산 봉수대',['풍경','사진 명소'],'야경·전망'],['부산항대교 전망',['풍경','사진 명소'],'야경·전망'],['몰운대',['풍경','휴양'],'야경·전망'],
+        ['해운대해수욕장',['풍경','휴양','가족 여행'],'바다·해양'],['송도해수욕장',['풍경','가족 여행'],'바다·해양'],['다대포해수욕장',['풍경','사진 명소','가족 여행'],'바다·해양'],['태종대',['풍경','휴양','가족 여행'],'바다·해양'],['오륙도',['풍경','사진 명소'],'바다·해양'],['광안리 SUP Zone',['스릴','액티비티','친구 여행'],'바다·해양'],
+        ['부산근현대역사관',['역사·문화','가족 여행'],'역사·문화'],['임시수도기념관',['역사·문화'],'역사·문화'],['부산타워',['역사·문화','사진 명소'],'역사·문화'],['용두산공원',['역사·문화','가족 여행'],'역사·문화'],['유엔기념공원',['역사·문화','휴양'],'역사·문화'],['초량 근대문화길',['역사·문화','사진 명소'],'역사·문화'],
+        ['감천문화마을',['사진 명소','친구 여행','역사·문화'],'도보·골목'],['흰여울문화마을',['풍경','사진 명소','휴양'],'도보·골목'],['초량 이바구길',['역사·문화','사진 명소'],'도보·골목'],['산복도로',['풍경','사진 명소'],'도보·골목'],['북항 일대 문화공간',['친구 여행','사진 명소'],'도보·골목'],
+        ['장산',['휴양','풍경','액티비티'],'자연·힐링'],['금정산',['휴양','풍경','액티비티'],'자연·힐링'],['이기대해안산책로',['풍경','휴양','액티비티'],'자연·힐링'],['낙동강하구 생태공원',['휴양','가족 여행'],'자연·힐링'],['을숙도',['휴양','가족 여행'],'생태·철새'],['삼락생태공원',['휴양','가족 여행','사진 명소'],'생태·철새'],['대저생태공원',['휴양','가족 여행'],'생태·철새'],
+        ['부산시립미술관',['역사·문화','카페'],'미술·전시·카페'],['부산현대미술관',['역사·문화','카페'],'미술·전시·카페'],['F1963',['카페','친구 여행','사진 명소'],'미술·전시·카페'],['영화의전당',['역사·문화','친구 여행'],'미술·전시·카페'],['전포 카페거리',['카페','친구 여행','사진 명소'],'음식·카페'],['광안리 카페거리',['카페','풍경','친구 여행'],'음식·카페'],['자갈치시장',['맛집','역사·문화','가족 여행'],'음식·카페'],['국제시장',['맛집','역사·문화'],'음식·카페'],['부평깡통시장',['맛집','친구 여행'],'음식·카페'],
+        ['국립부산과학관',['가족 여행','액티비티'],'가족·체험'],['부산어린이대공원',['가족 여행','휴양'],'가족·체험'],['키자니아 부산',['가족 여행','액티비티'],'가족·체험'],['아쿠아리움',['가족 여행','액티비티'],'가족·체험'],['청사포',['풍경','휴양','사진 명소'],'섬·어촌·항구'],['기장 연안 어촌마을',['풍경','휴양','가족 여행'],'섬·어촌·항구']
+      ];
+      const button = document.getElementById('recommendButton');
+      if (!button) return;
+      button.onclick = () => {
+        let preferences = [];
+        try { preferences = JSON.parse(localStorage.getItem('badayaProfile') || '{}').preferences || []; } catch (error) {}
+        const visitorKey = localStorage.getItem('badayaVisitorId') || 'guest';
+        const rank = (name) => [...(visitorKey + name)].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 100;
+        const places = recommendationPlaces.map(([name, tags, theme]) => ({ name, tags, theme, score: tags.filter((tag) => preferences.includes(tag)).length, variety: rank(name) })).sort((a, b) => b.score - a.score || b.variety - a.variety).slice(0, 12);
+        const modal = document.getElementById('recommendModal');
+        modal.innerHTML = `<div class="recommend-modal-inner"><div class="recommend-head"><div><p>MY BUSAN TRIP</p><h2>맞춤 여행지 TOP 12</h2><span>${preferences.length ? preferences.join(' · ') : '아직 선택한 취향이 없어요'}</span></div><button id="closeRecommend" type="button">×</button></div><ol class="recommend-list">${places.map((place, index) => { const query = encodeURIComponent(place.name + ' 부산 관광'); return `<li><b>${index + 1}</b><div><h3>${place.name}</h3><p>${place.theme} 테마 추천</p><small>${place.tags.map((tag) => '#' + tag).join(' ')}</small></div><span style="display:grid;gap:6px"><a href="https://search.naver.com/search.naver?query=${query}" target="_blank" rel="noopener">네이버</a><a href="https://www.google.com/search?q=${query}" target="_blank" rel="noopener">구글</a></span></li>`; }).join('')}</ol></div>`;
+        modal.classList.remove('hidden');
+        document.getElementById('closeRecommend').onclick = () => modal.classList.add('hidden');
+      };
+    });
+  </script>
 </body>
 </html>
